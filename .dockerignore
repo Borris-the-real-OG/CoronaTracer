@@ -1,0 +1,11 @@
+Dockerfile
+.dockerignore
+.gcloudignore
+.git*
+README.md
+
+__pycache__
+app.yaml
+
+Tracer/envs.sh
+*.csv

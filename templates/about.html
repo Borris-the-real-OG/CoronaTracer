@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+
+{% block content %}
+
+<h1 class="text-primary">About this project</h1>
+<iframe id="video" width="560" height="315" margin-top="10px" src="https://www.youtube.com/embed/VY7wDm94C2c?modestbranding=1&rel=0&enablejsapi=1&start=280" title="YouTube video player" display='none' frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+<h4><i>From <a href="https://www.congressionalappchallenge.us/">Congressional App Challenge</a> application</i></h4>
+
+<h2>Please briefly describe what your app does?</h2>
+<p>CoronaTracer EDU is a contact tracing app for school administrators using Google Classroom.
+Using the Google Classroom API, CoronaTracer EDU quickly gathers a list of people a student or teacher was in contact with and can email contacts to let them know they've been exposed to COVID-19, or export a spreadsheet of contacts for further processing.
+The simple web-based UI allows for granular control with cherrypicking and seating charts to filter a contact trace while still being straightforward and easy to use.</p>
+<h2>What inspired you to create this app?</h2>
+<p>I originally got the idea of an app using Google Classroom from "six degrees of separation" and finding people you share classes with at the beginning of the year, but shelved the idea because of permission issues with my school account.
+The idea came back up when I spoke to a teacher about how the contact tracing at Chicago Public Schools was very inefficient: Once a student reports testing positive for COVID-19, an administrator emails the student's teachers and ask for a seating chart of their class.
+This back-and-forth introduces a significant amount of lag in the contact tracing process.
+In a time-sensitive application like contact tracing, that lag could make the difference between a student staying home and getting tested or spreading COVID-19 to even more people.
+I realized that administrators could use the Google Classroom infrastructure that was already in place to contact trace any student in a matter of seconds.
+According to Google, 150 million people use Google Classroom... that's a lot of schools that could use my app!
+If CPS, the 3rd largest public school district in the US, doesn't have a uniform contact tracing framework, then I'm sure many other schools don't as well, and they can use my app to contact trace anyone in their district with minimal setup and technical expertise.</p>
+<h2>What technical difficulties did you face programming your app?</h2>
+<p>The main challenge I faced was using the Google Classroom API, because my school Google account doesn't have developer permissions and personal accounts don't have access to Google Workspace (what Google Classroom is a part of).
+My hack club sponsor and school's IT department were super helpful and got me dummy accounts to test my app with, but even then I wasn't able to test my app with a super admin account (which is required for contact tracing any user).
+I'd really like for Google (and other tech companies) to make the independent developer experience more accessible so the world doesn't miss out on any cool apps.<br>
+The second challenge I faced was using a new web framework, Flask.
+There was a bit of a learning curve, but I use Python quite frequently and found it easy to get up and running to develop the frontend for my app.
+However, I still very much a backend developer; Even with Bootstrap making web design more elegant and efficient, I still had to spend a ton of time getting everything to look polished.</p>
+<h2>What improvements would you make if you were to create a 2.0 version of your app?</h2>
+<p>Although I developed this app for Google Classroom because of the apparent need for a fast and easy solution to contact tracing in schools, there's no reason why this couldn't be applied to other large organizations who use Google Workspace.
+Additionally, I chose to integrate my app with Google because that's what my school uses, but any similar enterprise solution would work, such as Canvas for schools.<br>
+Although my app does not store any sensitive data besides credentials and tokens for API calls, I would want to increase the security of my app even more for handling real user data.
+This is especially important because my app would likely be handling data of students under 13 years old, which (I think) means it would have to be COPPA compliant.<br>
+Right now, my app uses a very simple web based API but is hosted locally on my computer.
+In order to actually deploy my app, I would use Docker to containerize my app and deploy it to the cloud, allowing for school administrators to use it with no local setup.</p>
+
+{% endblock %}

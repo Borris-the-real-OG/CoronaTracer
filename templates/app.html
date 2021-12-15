@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}CoronaTracer{% endblock %}
+
+{% set subject = "COVID-19 Exposure Alert" %}
+{% set body = """<html>
+    <head></head>
+    <body>
+        <h1>COVID-19 Exposure Alert</h1>
+        <p>Hello,<br>
+        You are receiving this email because you were in a class with an individual who has recently tested positive for COVID-19. If you are vaccinated and are not experiencing any symptoms, no further action is required. If you are unvaccinated, please get a COVID test immediately and quarantine until you can confirm you don't have COVID.<br><br>
+        Best,<br>
+        Payton IT Department</p>
+    </body>
+    </html>""" %}
+{% set demo = True %}
+
+{% block meta %}
+
+<script type="text/javascript">
+    $(window).on('load', function() {
+        $('#errorBox').modal('show');
+    });
+    $(document).ready(function() {
+        $("#errorDismiss").click(function(){
+            $('#errorBox').modal('hide');
+        });
+    });
+</script>
+
+{% endblock %}
+
+{% block content %}
+{% if props.message %}
+<div class="modal fade" id="errorBox" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title {% if props.message.good %}text-success{% else %}text-danger{% endif %}" id="exampleModalLabel">{{ props.message.title }}</h5>
+            </div>
+            <div class="modal-body">
+                <p>{{ props.message.description }}</p>
+                    {% if props.message.stackTrace %}
+                    <button type="button" id="error-btn" class="btn" data-bs-toggle="collapse" href="#stackTrace">
+                        Full error <i class="bi bi-caret-down-fill"></i>
+                    </button>
+                    <div id="stackTrace" class="collapse">
+                        <div class="overflow-auto"><i>{{ props.message.stackTrace }}</i></div>
+                    </div>
+                    {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button id="errorDismiss" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if demo %}
+<h3 class="display-5 text-warning">THIS IS A DEMO BUILD</h3>
+<p class="text-warning">This uses dummy accounts and does not have access to <u>any</u> personally identifiable information.
+<br>The dummy accounts follow the pattern student{1-21}@wpcp.org and most have the first and last names student{x}. For example, (student4, student4, student4@wpcp.org).
+<br>Also, this will expire when my 90 days are up (or my $300 in SDK credits expire, whichever comes first). This is not meant to be a permament fixture.</p>
+{% endif %}
+<h1 class="display-4">Step 1</h1>
+<form action="{{ url_for('apper') }}" method="post">
+    <label for="targetEmail">Enter in the email of the person you would like to contact trace.</label>
+    <div class="input-group mb-3" style="max-width: 50%;">
+        <input type="email" id="targetEmail" class="form-control" placeholder="Target's Email" name="userEmail"
+        {% if props.profile is not none %}
+        value="{{ props.profile['emailAddress'] }}"
+        {% endif %}
+        >
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+</form>
+{% if props.profile %}
+<h4 class="text-info">Target: {{ props.profile.name.fullName }}</h4>
+{% endif %}
+{% if props.courses != [] %}
+<br>
+<h1 class="display-4">Step 2</h1>
+<p>Click "Ignore?" to remove a class from the contact trace list, and click "Include?" to add it back.
+<br>Check "Ignore seating charts" to bypass any teacher supplied seating charts, contact tracing everyone in every class.
+</p>
+<form action="{{ url_for('apper') }}" method="post">
+    <div class="form-check">
+        <label class="form-check-label" for="inlineCheckbox1">Ignore seating charts</label>
+        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="noSeating">
+    </div>
+    <ul style="list-style: none; max-width: 80%;">
+        {% for course in props.courses %}
+        <li>
+            <div class="card 
+            {% if course.ignored %}
+            bg-danger
+            {% else %}
+            bg-success
+            {% endif %}
+            " id='card_{{ course.id }}'>
+                <div class="card-body">
+                    <h5 class="d-inline text-white">{{ course.name }}</h5>&emsp;
+                    <button type='button' class='btn btn-primary' id='btn_{{ course.id }}' onClick='
+                    if (document.getElementById("card_{{ course.id }}").classList.contains("bg-danger")) {
+                        document.getElementById("card_{{ course.id }}").classList.remove("bg-danger");
+                        document.getElementById("card_{{ course.id }}").classList.add("bg-success");
+                        document.getElementById("btn_{{ course.id }}").innerHTML = "Ignore?";
+                        document.getElementById("field_{{ course.id }}").setAttribute("name", "{{ course.id }}_include");
+                    } else {
+                        document.getElementById("card_{{ course.id }}").classList.add("bg-danger");
+                        document.getElementById("btn_{{ course.id }}").innerHTML = "Include?";
+                        document.getElementById("field_{{ course.id }}").setAttribute("name", "{{ course.id }}_ignore");
+                    }
+                    '>
+                    {% if course.ignored %}
+                    Include?
+                    {% else %}
+                    Ignore?
+                    {% endif %}
+                    </button>
+                    <input type="hidden" id="field_{{ course.id }}" name='{{ course.id }}_{% if course.ignored %}ignore{% else %}include{% endif %}'>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    <input type="hidden" name="course-phase">
+    <button type="submit" class="btn btn-primary">Trace!</button>
+</form>
+<br>
+
+{% endif %}
+
+{% if props.ppl_list != [] %}
+<br>
+<h3 class="text-info">Successfully traced {{ props.ppl_list|length }} contact{% if props.ppl_list|length > 1%}s{% endif %}.</h3>
+<br>
+<h1 class="display-4">Step 3</h1>
+<p>If a contact in the table is <span class="text-info">blue</span>, it means they're a teacher.
+<br>Click "Email" to bcc email all contacts listed below, optionally specifying a subject or body. If you would like to render HTML in the body, make sure the body starts with an &lt;html&gt; tag.
+<br>Click "Export" to export a list of contacts to a CSV file, optionally specifying a filename.</p>
+<a class="btn btn-primary" data-bs-toggle="collapse" href="#email-collapse" role="button">Email <i class="bi bi-caret-down-fill"></i></a>
+<a class="btn btn-primary" data-bs-toggle="collapse" href="#export-collapse" role="button">Export <i class="bi bi-caret-down-fill"></i></a>
+
+<div id="email-collapse" class="collapse">
+    <form action="{{ url_for('apper') }}" method="post">
+        {% if demo %}
+        <div class="form-group">
+            <label for="emailSubject" class="h5 text-warning">Add your email address here if you want to receive the contact tracing email.</label>
+            <input type="email" class="form-control" id="extraEmail" value="" name="extraEmail">
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label for="emailSubject">Subject</label>
+            <input type="text" class="form-control" id="emailSubject" value="{{ subject }}" name="emailSubject">
+        </div>
+        <div class="form-group">
+            <label for="emailBody">Body</label>
+            <textarea class="form-control" id="emailBody" rows="6" name="emailBody">{{ body }}</textarea>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-success">Email</button>
+        </div>
+    </form>
+</div>
+<br><br>
+<div id="export-collapse" class="collapse">
+    <form action="{{ url_for('apper') }}" method="post">
+        <div class="form-group">
+            <label for="exportName">Filename</label>
+            <input type="text" class="form-control" id="exportName" value="traced_contacts ({{props.profile['name']['givenName']}}).csv" name="exportName">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-success">Export</button>
+        </div>
+    </form>
+</div>
+
+<!-- todo: truncate list past ~50 entries -->
+<table class='table'>
+    <thead>
+        <tr>
+            <th scope='col'>Name</th>
+            <th scope='col'>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in props.ppl_list %}
+        <tr {% if p.isTeacher %}class='table-info'{% endif %}>
+            <th scope='row'>{{ p.name }}</th>
+            <td>{{ p.email }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endif %}
+
+{% endblock %}

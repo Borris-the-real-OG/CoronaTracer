@@ -1,0 +1,7 @@
+# for Google App Engine, see https://cloud.google.com/appengine/docs/standard/python3/building-app/deploying-web-service
+runtime: python39
+
+env_variables:
+  SEATING_CHART_TITLE: "(CoronaTracer) Seating Chart"
+  SENDER_EMAIL: "EMAIL ADDRESS HERE"
+  SENDER_PASS: "EMAIL PASSWORD HERE"
